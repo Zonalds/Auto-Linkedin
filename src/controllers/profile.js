@@ -13,7 +13,7 @@ class LinkedinProfile {
    * @param {string} details.buttonText - profile's main button (connect, message or follow etc)
    * @param {Array<Objecr>} details.experiences - work experiences list
    */
-  constructor(details) { 
+  constructor(details) {
     this.details = details
   }
 
@@ -31,22 +31,22 @@ class LinkedinProfile {
     const page = await browser.newPage()
     await page.goto(linkedinClient.linkedinSettings.MAIN_ADDRESS + 'in/' + this.details.id)
     await page.waitForSelector('.scaffold-layout__main')
-    
+
     if (scrollPage) {
 
       await page.evaluate(async () => {
         const totalDuration = 5 * 1000;
         const scrollStep = window.innerHeight / 2;
         const delay = 100;
-    
+
         const startTime = Date.now();
         const endTime = startTime + totalDuration;
-    
+
         while (Date.now() < endTime) {
           window.scrollBy(0, scrollStep);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
-  
+
         window.scrollTo(0, document.body.scrollHeight);
       });
 
@@ -64,7 +64,7 @@ class LinkedinProfile {
   async connectionRequest(linkedinClient, connectionMessage, waitMs) {
     if (!waitMs) waitMs = randomNumber(linkedinClient.linkedinSettings.COOLDOWN_MIN * 1000, linkedinClient.linkedinSettings.COOLDOWN_MAX * 1000)
     linkedinClient.loggerFunction('[TASK] Conection request: ' + this.details.name + ' (waitMs: ' + waitMs.toFixed(0) + ')');
-    
+
     const browser = await linkedinClient.getBrowser()
     const page = await browser.newPage()
     await page.goto(linkedinClient.linkedinSettings.MAIN_ADDRESS + 'in/' + this.details.id)
@@ -92,23 +92,23 @@ class LinkedinProfile {
       let connectButtonQuery = '.scaffold-layout__main > section > div:nth-child(2) > div:last-child > div > button'
       await page.waitForSelector(connectButtonQuery);
       await page.click(connectButtonQuery);
-  
+
       let actionBarQuery = '#artdeco-modal-outlet > div > div > .artdeco-modal__actionbar'
       await page.waitForSelector(actionBarQuery);
       if (!connectionMessage) {
-          await page.click(actionBarQuery + ' > button:nth-child(2)');
+        await page.click(actionBarQuery + ' > button:nth-child(2)');
       } else {
-          await page.click(actionBarQuery + ' > button:first-child');
-  
-          await page.waitForSelector('#custom-message');
-          await page.focus('#custom-message');
-          await page.type('#custom-message', connectionMessage);
-  
-          await page.focus('.artdeco-modal__actionbar > button:nth-child(2)');
-          await page.click('.artdeco-modal__actionbar > button:nth-child(2)');
+        await page.click(actionBarQuery + ' > button:first-child');
+
+        await page.waitForSelector('#custom-message');
+        await page.focus('#custom-message');
+        await page.type('#custom-message', connectionMessage);
+
+        await page.focus('.artdeco-modal__actionbar > button:nth-child(2)');
+        await page.click('.artdeco-modal__actionbar > button:nth-child(2)');
       }
       await new Promise(r => setTimeout(r, 500));
-  
+
       await new Promise(r => setTimeout(r, waitMs));
       await page.close()
       return linkedinClient.loggerFunction('  Connection request sent.')
@@ -125,22 +125,22 @@ class LinkedinProfile {
       let connectButtonQuery = '.scaffold-layout__main > section > div:nth-child(2) > div > div > div:last-child > div > div > ul > li:nth-child(3) > div'
       await page.waitForSelector(connectButtonQuery);
       await page.click(connectButtonQuery);
-  
+
       let actionBarQuery = '#artdeco-modal-outlet > div > div > .artdeco-modal__actionbar'
       await page.waitForSelector(actionBarQuery);
       if (!connectionMessage) {
-          await page.click(actionBarQuery + ' > button:nth-child(2)');
+        await page.click(actionBarQuery + ' > button:nth-child(2)');
       } else {
-          await page.click(actionBarQuery + ' > button:first-child');
-  
-          await page.waitForSelector('#custom-message');
-          await page.focus('#custom-message');
-          await page.type('#custom-message', connectionMessage);
-  
-          await page.focus('.artdeco-modal__actionbar > button:nth-child(2)');
-          await page.click('.artdeco-modal__actionbar > button:nth-child(2)');
+        await page.click(actionBarQuery + ' > button:first-child');
+
+        await page.waitForSelector('#custom-message');
+        await page.focus('#custom-message');
+        await page.type('#custom-message', connectionMessage);
+
+        await page.focus('.artdeco-modal__actionbar > button:nth-child(2)');
+        await page.click('.artdeco-modal__actionbar > button:nth-child(2)');
       }
-      
+
       await new Promise(r => setTimeout(r, waitMs));
       await page.close()
       return linkedinClient.loggerFunction('  Connection request sent.')
@@ -159,15 +159,15 @@ class LinkedinProfile {
 
     const browser = await linkedinClient.getBrowser()
     const page = await browser.newPage()
-    
+
     //! if not change viewport, message button not works.
     await page.setViewport({ width: 1366, height: 768 })
 
     await page.goto(linkedinClient.linkedinSettings.MAIN_ADDRESS + 'in/' + this.details.id)
 
     try { await page.waitForSelector('.scaffold-layout__main > section > div:nth-child(2) > div > div > div > .artdeco-button') }
-    catch (e) { throw new Error('Cannot send message to user. Message button not found in profile. (1)')  }
-    
+    catch (e) { throw new Error('Cannot send message to user. Message button not found in profile. (1)') }
+
 
     let buttonText = await page.evaluate(async () => {
       await new Promise(r => setTimeout(r, 500));
@@ -187,9 +187,9 @@ class LinkedinProfile {
     await page.waitForSelector('.msg-form__contenteditable')
     await page.type('.msg-form__contenteditable', message)
 
-    await new Promise(r => setTimeout(r, waitMs/2));
+    await new Promise(r => setTimeout(r, waitMs / 2));
     await page.tap('.msg-form__send-button')
-    await new Promise(r => setTimeout(r, waitMs/2));
+    await new Promise(r => setTimeout(r, waitMs / 2));
   }
 
   /** Get Message history with this profile
@@ -199,62 +199,62 @@ class LinkedinProfile {
    */
   async getMessageHistory(linkedinClient, waitMs) {
     if (!waitMs) waitMs = randomNumber(linkedinClient.linkedinSettings.COOLDOWN_MIN * 1000, linkedinClient.linkedinSettings.COOLDOWN_MAX * 1000)
-      linkedinClient.loggerFunction('[TASK] Message History: ' + this.details.name + ' (waitMs: ' + waitMs.toFixed(0) + ')');
-  
-      const browser = await linkedinClient.getBrowser()
-      const page = await browser.newPage()
-      
-      //! if not change viewport, message button not works.
-      await page.setViewport({ width: 1366, height: 768 })
-  
-      await page.goto(linkedinClient.linkedinSettings.MAIN_ADDRESS + 'in/' + this.details.id)
-  
-      try { await page.waitForSelector('.scaffold-layout__main > section > div:nth-child(2) > div > div > div > .artdeco-button') }
-      catch (e) { throw new Error('Cannot send message to user. Message button not found in profile. (1)')  }
-      
-  
-      let buttonText = await page.evaluate(async () => {
-        await new Promise(r => setTimeout(r, 500));
-  
-        //* If there is extra div remove it
-        if (document.querySelector('.scaffold-layout__main > section > div:nth-child(2) > div:last-child').classList[0] === 'display-flex') document.querySelector('.scaffold-layout__main > section > div:nth-child(2) > div:last-child').remove()
-  
-        let parentDiv = document.querySelector('.scaffold-layout__main > section > div:nth-child(2) > div:last-child')
-        return parentDiv.querySelector('button').textContent.trim()
-      })
-  
-      const firstButtonisMessage = (buttonText === linkedinClient.linkedinSettings.PROFILEBUTTON_MESSAGE)
-      if (!firstButtonisMessage) throw new Error('Cannot send message to user. Message button not found in profile. (2)');
-  
-      await page.tap('.scaffold-layout__main > section > div:nth-child(2) > div > div > div > .artdeco-button')
+    linkedinClient.loggerFunction('[TASK] Message History: ' + this.details.name + ' (waitMs: ' + waitMs.toFixed(0) + ')');
+
+    const browser = await linkedinClient.getBrowser()
+    const page = await browser.newPage()
+
+    //! if not change viewport, message button not works.
+    await page.setViewport({ width: 1366, height: 768 })
+
+    await page.goto(linkedinClient.linkedinSettings.MAIN_ADDRESS + 'in/' + this.details.id)
+
+    try { await page.waitForSelector('.scaffold-layout__main > section > div:nth-child(2) > div > div > div > .artdeco-button') }
+    catch (e) { throw new Error('Cannot send message to user. Message button not found in profile. (1)') }
 
 
-      await new Promise(r => setTimeout(r, waitMs));
+    let buttonText = await page.evaluate(async () => {
+      await new Promise(r => setTimeout(r, 500));
 
-      let messages = await page.evaluate(() => {
-        let msgs = []
-        let lastMsgTime, lastMsgName
-        for (let msg of document.querySelectorAll('.msg-s-event-listitem, .msg-s-message-list__time-heading')) {
-          
-          if (msg.tagName.toLowerCase() === 'div') {
-            if (msg.querySelector('time')) lastMsgTime = msg.querySelector('time').innerText.trim().replaceAll(' ','')
-            if (msg.querySelector('a > img')) lastMsgName = msg.querySelector('a > img').title.trim()
-  
-            msgs.push({
-              time: lastMsgTime,
-              name: lastMsgName,
-              message: msg.querySelector('.msg-s-event__content').innerText.trim()
-            })
-          }
-          else if (msg.tagName.toLowerCase() === 'time') {
-            msgs.push(msg.innerText)
-          }
+      //* If there is extra div remove it
+      if (document.querySelector('.scaffold-layout__main > section > div:nth-child(2) > div:last-child').classList[0] === 'display-flex') document.querySelector('.scaffold-layout__main > section > div:nth-child(2) > div:last-child').remove()
 
+      let parentDiv = document.querySelector('.scaffold-layout__main > section > div:nth-child(2) > div:last-child')
+      return parentDiv.querySelector('button').textContent.trim()
+    })
+
+    const firstButtonisMessage = (buttonText === linkedinClient.linkedinSettings.PROFILEBUTTON_MESSAGE)
+    if (!firstButtonisMessage) throw new Error('Cannot send message to user. Message button not found in profile. (2)');
+
+    await page.tap('.scaffold-layout__main > section > div:nth-child(2) > div > div > div > .artdeco-button')
+
+
+    await new Promise(r => setTimeout(r, waitMs));
+
+    let messages = await page.evaluate(() => {
+      let msgs = []
+      let lastMsgTime, lastMsgName
+      for (let msg of document.querySelectorAll('.msg-s-event-listitem, .msg-s-message-list__time-heading')) {
+
+        if (msg.tagName.toLowerCase() === 'div') {
+          if (msg.querySelector('time')) lastMsgTime = msg.querySelector('time').innerText.trim().replaceAll(' ', '')
+          if (msg.querySelector('a > img')) lastMsgName = msg.querySelector('a > img').title.trim()
+
+          msgs.push({
+            time: lastMsgTime,
+            name: lastMsgName,
+            message: msg.querySelector('.msg-s-event__content').innerText.trim()
+          })
         }
-        return msgs
-      })
+        else if (msg.tagName.toLowerCase() === 'time') {
+          msgs.push(msg.innerText)
+        }
 
-      return messages
+      }
+      return msgs
+    })
+
+    return messages
   }
 
   /** Get profile with url
@@ -264,7 +264,7 @@ class LinkedinProfile {
    */
   static async getProfile(linkedinClient, url) {
     if (url.includes('/in/')) url = url.split('/in/')[1].replaceAll('/', '')
-      linkedinClient.loggerFunction('[TASK] Get profile: ' + url);
+    linkedinClient.loggerFunction('[TASK] Get profile: ' + url);
 
     const browser = await linkedinClient.getBrowser()
     const page = await browser.newPage()
@@ -290,44 +290,48 @@ class LinkedinProfile {
     details.id = url
     details.link = page.url()
 
-    details.experiences = await page.evaluate(() => {
-      let divs = document.querySelector('#experience')?.parentElement?.querySelectorAll('.artdeco-list__item') ?? []
-      let result = []
-      for (let elm of divs) {
+    try {
+      details.experiences = await page.evaluate(() => {
+        let divs = document.querySelector('#experience')?.parentElement?.querySelectorAll('.artdeco-list__item') ?? []
+        let result = []
+        for (let elm of divs) {
 
           let company_name, company_url, employment_type, title, period
 
-          company_url =  elm.querySelector('a').href
+          company_url = elm.querySelector('a').href
           if (company_url.includes('search')) company_url = null
-          
+
           //. Multi title/position
           if (elm.querySelector('div > div:nth-child(2) > div > a > div')) {
-              company_name = elm.querySelector('div > div:nth-child(2) > div > a > div').querySelector('span').innerText
-              title = elm.querySelector('div > div:nth-child(2) > div:nth-child(2)').querySelector('a > div').querySelector('span').innerText
-              if (elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText.includes('·')) {
-                  employment_type = elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText.split(' · ')[0]
-                  period = elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText.split(' · ')[1]
-              }
-              else {
-                  period = elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText
-              }
+            company_name = elm.querySelector('div > div:nth-child(2) > div > a > div').querySelector('span').innerText
+            title = elm.querySelector('div > div:nth-child(2) > div:nth-child(2)').querySelector('a > div').querySelector('span').innerText
+            if (elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText.includes('·')) {
+              employment_type = elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText.split(' · ')[0]
+              period = elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText.split(' · ')[1]
+            }
+            else {
+              period = elm.querySelector('div > div:nth-child(2) > div > a > span > span').innerText
+            }
           }
 
           //. Single title/position
           else {
-              company_name = elm.querySelector('div > div:nth-child(2) > div > div > span > span').innerText.split(' · ')[0]
-              employment_type = elm.querySelector('div > div:nth-child(2) > div > div > span > span').innerText.split(' · ')[1]
-              title = elm.querySelector('div > div:nth-child(2) > div > div > div').querySelector('span').innerText
-              period = elm.querySelector('div > div:nth-child(2) > div > div > span:nth-child(3) > span').innerText
+            company_name = elm.querySelector('div > div:nth-child(2) > div > div > span > span').innerText.split(' · ')[0]
+            employment_type = elm.querySelector('div > div:nth-child(2) > div > div > span > span').innerText.split(' · ')[1]
+            title = elm.querySelector('div > div:nth-child(2) > div > div > div').querySelector('span').innerText
+            period = elm.querySelector('div > div:nth-child(2) > div > div > span:nth-child(3) > span').innerText
           }
-          
+
           result.push({
-              company_url,
-              company_name, employment_type, title, period
+            company_url,
+            company_name, employment_type, title, period
           })
-      }
-      return result
-    })
+        }
+        return result
+      })
+    } catch (error) {
+      details.experiences = []
+    }
 
     await new Promise(r => setTimeout(r, 500));
     await page.close()
