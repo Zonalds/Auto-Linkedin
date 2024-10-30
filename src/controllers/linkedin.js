@@ -64,7 +64,7 @@ class LinkedIn {
    * @param {string} password - The LinkedIn password
    * @returns {Promise<void>} Returns when the login process is completed
    */
-  async login(username, password, customCookies) {
+  async login(username, password, customCookies, proxyAuth) {
     this.loggerFunction('[TASK] Login');
 
     const browser = await this.getBrowser()
@@ -72,6 +72,9 @@ class LinkedIn {
 
     if (customCookies) {
       let cookies = JSON.parse(customCookies)
+      if (proxyAuth) {
+        await page.authenticate({ username: proxyAuth?.username, password: proxyAuth?.password })
+      }
       await page.setCookie(...cookies)
       await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'feed')
 
