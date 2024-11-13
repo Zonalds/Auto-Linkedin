@@ -1,6 +1,6 @@
 {
   "name": "@xoal/auto-linkedin",
-  "version": "1.0.4",
+  "version": "1.0.5-beta",
   "description": "Copy of Auto-Linkedin",
   "main": "src/main.js",
   "scripts": {
@@ -20,7 +20,8 @@
     "url": "https://github.com/Ranork/Auto-Linkedin"
   },
   "dependencies": {
-    "puppeteer": "^22.8.1"
+    "puppeteer": "^22.8.1",
+    "rebrowser-puppeteer": "^23.6.101"
   },
   "publishConfig": {
     "access": "public"

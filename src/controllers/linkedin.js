@@ -1,4 +1,4 @@
-const { default: puppeteer } = require("puppeteer");
+const { default: puppeteer } = require("rebrowser-puppeteer");
 const querystring = require('querystring');
 const fs = require('fs');
 const LinkedinProfile = require("./profile");
@@ -64,11 +64,16 @@ class LinkedIn {
    * @param {string} password - The LinkedIn password
    * @returns {Promise<void>} Returns when the login process is completed
    */
-  async login(username, password, customCookies, proxyAuth) {
+  async login(username, password, customData) {
+    const { customCookies, proxyAuth, userAgent } = customData || {}
     this.loggerFunction('[TASK] Login');
 
     const browser = await this.getBrowser()
     const page = await browser.newPage()
+    if (userAgent) {
+      await page.setUserAgent(userAgent);
+    }
+
 
     if (customCookies) {
       let cookies = JSON.parse(customCookies)
