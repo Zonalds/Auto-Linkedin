@@ -70,6 +70,7 @@ class LinkedIn {
 
     const browser = await this.getBrowser()
     const page = await browser.newPage()
+    await page.setViewport({ width: 1080, height: 1024 });
     if (userAgent) {
       await page.setUserAgent(userAgent);
     }
@@ -87,6 +88,8 @@ class LinkedIn {
 
       if (page.url().endsWith('feed/')) {
         await page.close()
+        const cookies = await page.cookies()
+        fs.writeFileSync(this.linkedinSettings.CACHE_DIR + 'cookies.json', JSON.stringify(cookies))
         return this.loggerFunction('  Logged in from custom cookies.')
       }
       else {
@@ -162,7 +165,7 @@ class LinkedIn {
 
 
     if (page.url().includes('feed')) {
-      this.loggerFunction('  Login complated.');
+      this.loggerFunction('  Login completed.');
 
       const cookies = await page.cookies()
       fs.writeFileSync(this.linkedinSettings.CACHE_DIR + 'cookies.json', JSON.stringify(cookies))
@@ -173,6 +176,38 @@ class LinkedIn {
       await new Promise(r => setTimeout(r, 3000));
       throw new Error('Login Failed.')
     }
+  }
+
+  async loginWithExistingCookiesTest(customData) {
+    const { userAgent } = customData || {}
+    this.loggerFunction('[TASK] Login with existing cookie test');
+
+    const browser = await this.getBrowser()
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1080, height: 1024 });
+    if (userAgent) {
+      await page.setUserAgent(userAgent);
+    }
+
+    if (fs.existsSync(this.linkedinSettings.CACHE_DIR + 'cookies.json')) {
+      let cookies = JSON.parse(fs.readFileSync(this.linkedinSettings.CACHE_DIR + 'cookies.json'))
+      await page.setCookie(...cookies)
+      await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'feed')
+
+      await new Promise(r => setTimeout(r, randomNumber(1, 3) * 1000));
+
+      if (page.url().endsWith('feed/')) {
+        await page.close()
+        return this.loggerFunction('  Logged in from cache.')
+      }
+      else {
+        this.loggerFunction('  Login from cache failed. Trying to login again.');
+        const client = await page.createCDPSession()
+        await client.send('Network.clearBrowserCookies')
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
   }
 
   /** Closes the client

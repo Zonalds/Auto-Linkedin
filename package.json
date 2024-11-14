@@ -1,6 +1,6 @@
 {
   "name": "@xoal/auto-linkedin",
-  "version": "1.0.5-beta",
+  "version": "1.0.5-beta1",
   "description": "Copy of Auto-Linkedin",
   "main": "src/main.js",
   "scripts": {
