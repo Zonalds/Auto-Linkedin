@@ -54,8 +54,8 @@ class LinkedIn {
   async getBrowser() {
     if (this.browser) { return this.browser }
 
-    this.browser = await puppeteer.launch(this.browserSettings)
-    this.loggerFunction('  New Browser created.')
+    this.browser = await puppeteer.connect(this.browserSettings)
+    this.loggerFunction('  Connected to browser.')
     return this.browser
   }
 
@@ -65,16 +65,15 @@ class LinkedIn {
    * @returns {Promise<void>} Returns when the login process is completed
    */
   async login(username, password, customData) {
-    const { customCookies, proxyAuth, userAgent } = customData || {}
+    const { customCookies, proxyAuth, userAgent } = customData
     this.loggerFunction('[TASK] Login');
 
     const browser = await this.getBrowser()
     const page = await browser.newPage()
-    await page.setViewport({ width: 1080, height: 1024 });
+
     if (userAgent) {
       await page.setUserAgent(userAgent);
     }
-
 
     if (customCookies) {
       let cookies = JSON.parse(customCookies)
@@ -87,9 +86,11 @@ class LinkedIn {
       await new Promise(r => setTimeout(r, randomNumber(1, 3) * 1000));
 
       if (page.url().endsWith('feed/')) {
-        await page.close()
+        this.loggerFunction('  Login completed.');
+
         const cookies = await page.cookies()
         fs.writeFileSync(this.linkedinSettings.CACHE_DIR + 'cookies.json', JSON.stringify(cookies))
+        await page.close()
         return this.loggerFunction('  Logged in from custom cookies.')
       }
       else {
@@ -178,37 +179,29 @@ class LinkedIn {
     }
   }
 
-  async loginWithExistingCookiesTest(customData) {
-    const { userAgent } = customData || {}
-    this.loggerFunction('[TASK] Login with existing cookie test');
+
+  async confirmLoginOnCloudBrowser() {
+    this.loggerFunction('[TASK] Confirm login');
 
     const browser = await this.getBrowser()
     const page = await browser.newPage()
-    await page.setViewport({ width: 1080, height: 1024 });
-    if (userAgent) {
-      await page.setUserAgent(userAgent);
+
+    await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'feed')
+
+    let afterLoginUrl = page.url()
+    this.loggerFunction(`  AfterCloud URL:  ${afterLoginUrl}`);
+
+    if (page.url().includes('feed')) {
+      this.loggerFunction('  Login on cloud confirmed.');
+      await page.close()
+      return this.loggerFunction('  Logged on cloud browser.');
     }
-
-    if (fs.existsSync(this.linkedinSettings.CACHE_DIR + 'cookies.json')) {
-      let cookies = JSON.parse(fs.readFileSync(this.linkedinSettings.CACHE_DIR + 'cookies.json'))
-      await page.setCookie(...cookies)
-      await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'feed')
-
-      await new Promise(r => setTimeout(r, randomNumber(1, 3) * 1000));
-
-      if (page.url().endsWith('feed/')) {
-        await page.close()
-        return this.loggerFunction('  Logged in from cache.')
-      }
-      else {
-        this.loggerFunction('  Login from cache failed. Trying to login again.');
-        const client = await page.createCDPSession()
-        await client.send('Network.clearBrowserCookies')
-        await new Promise(r => setTimeout(r, 1000));
-      }
+    else {
+      await new Promise(r => setTimeout(r, 3000));
+      throw new Error('Login Failed.')
     }
-
   }
+
 
   /** Closes the client
    * @returns {void}
@@ -364,20 +357,33 @@ class LinkedIn {
   }
 
   async getMyProfile() {
-    this.loggerFunction('[TASK] Get My Profile');
+    try {
+      this.loggerFunction('[TASK] Get My Profile');
 
 
-    const browser = await this.getBrowser()
-    const page = await browser.newPage()
+      const browser = await this.getBrowser()
+      const page = await browser.newPage()
 
-    await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'feed/')
+      // await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'feed/')
 
-    let profile_link = await page.evaluate(() => (document.querySelector('.feed-identity-module').querySelector('a').href))
+      // let profile_link = await page.evaluate(() => (document.querySelector('.feed-identity-module').querySelector('a').href))
+      // this.loggerFunction(` My profile: ${profile_link}`);
 
-    await page.close()
+      await page.goto(this.linkedinSettings.MAIN_ADDRESS + 'in/')
 
-    return await LinkedinProfile.getProfile(this, profile_link)
+      await new Promise(r => setTimeout(r, randomNumber(1, 3) * 1000));
 
+      let profile_link = page?.url()
+      this.loggerFunction(` My profile: ${profile_link}`);
+
+      await page.close()
+
+      return await LinkedinProfile.getProfile(this, profile_link)
+
+    } catch (error) {
+      this.loggerFunction(`[ERROR] ${JSON.stringify(error, null, 2)}`);
+
+    }
   }
 
 }
